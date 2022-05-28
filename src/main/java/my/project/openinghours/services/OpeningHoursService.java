@@ -41,7 +41,7 @@ public class OpeningHoursService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PATTERN);
         return Instant.ofEpochSecond(unixTime)
                 .atZone(ZoneId.of(UTC))
-                .format(formatter);
+                .format(formatter).toUpperCase();
     }
 
     private String buildDaySchedule(EnumMap<Day, List<Type>> map, Day day) {
