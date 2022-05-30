@@ -1,14 +1,13 @@
 package my.project.openinghours.services;
 
-import my.project.openinghours.controllers.inbound.Day;
-import my.project.openinghours.controllers.inbound.Type;
-import my.project.openinghours.controllers.inbound.TypeEnum;
+import my.project.openinghours.model.Status;
+import my.project.openinghours.model.UnixTime;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,43 +21,43 @@ public class OpeningHoursService {
     private static final String CLOSED = "Closed";
     private static final String UTC = "UTC";
 
-    public Map<String, String> convertToReadableFormat(EnumMap<Day, List<Type>> dayListEnumMap) {
-        Map<String, String> readableMap = new LinkedHashMap<>();
-        for (Map.Entry<Day, List<Type>> entry : dayListEnumMap.entrySet()) {
-            String key = capitalize(entry.getKey().getDay());
+    public Map<String, String> convertToReadableFormat(Map<DayOfWeek, List<UnixTime>> dayListEnumMap) {
+        Map<String, String> readableFormatMap = new LinkedHashMap<>();
+        for (Map.Entry<DayOfWeek, List<UnixTime>> entry : dayListEnumMap.entrySet()) {
+            String key = capitalize(entry.getKey().name().toLowerCase());
             String val;
             if (entry.getValue().isEmpty()) {
                 val = CLOSED;
             } else {
                 val = buildDaySchedule(dayListEnumMap, entry.getKey());
             }
-            readableMap.put(key, val);
+            readableFormatMap.put(key, val);
         }
-        return readableMap;
+        return readableFormatMap;
     }
 
-    public String convertUnixTimeToAmPm(int unixTime) {
+    public String convertTypeToAmPm(int Type) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PATTERN);
-        return Instant.ofEpochSecond(unixTime)
+        return Instant.ofEpochSecond(Type)
                 .atZone(ZoneId.of(UTC))
                 .format(formatter);
     }
 
-    private String buildDaySchedule(EnumMap<Day, List<Type>> map, Day day) {
-        List<Type> types = map.get(day);
+    private String buildDaySchedule(Map<DayOfWeek, List<UnixTime>> map, DayOfWeek day) {
+        List<UnixTime> unixTimesTypes = map.get(day);
         StringBuilder sb = new StringBuilder();
         boolean isOpen = false;
-        for (int i = 0; i < types.size(); i++) {
-            Type type = types.get(i);
-            if (i == 0 && TypeEnum.CLOSE.equals(type.getType())) {
+        for (int i = 0; i < unixTimesTypes.size(); i++) {
+            UnixTime type = unixTimesTypes.get(i);
+            if (i == 0 && Status.CLOSE.equals(type.getType())) {
                 continue;
             }
-            if (!isOpen && TypeEnum.OPEN.equals(type.getType())) {
+            if (!isOpen && Status.OPEN.equals(type.getType())) {
                 isOpen = true;
-                sb.append(convertUnixTimeToAmPm(type.getValue())).append(" - ");
-            } else if (isOpen && TypeEnum.CLOSE.equals(type.getType())) {
+                sb.append(convertTypeToAmPm(type.getValue())).append(" - ");
+            } else if (isOpen && Status.CLOSE.equals(type.getType())) {
                 isOpen = false;
-                sb.append(convertUnixTimeToAmPm(type.getValue())).append(", ");
+                sb.append(convertTypeToAmPm(type.getValue())).append(", ");
             } else {
                 throw new IllegalArgumentException("Invalid value for day: " + day);
             }
@@ -69,13 +68,13 @@ public class OpeningHoursService {
         return sb.toString().replaceAll(", $", "");
     }
 
-    private String addNextDayValue(EnumMap<Day, List<Type>> map, Day day) {
-        Day nextDay = Day.of(day.getValue() + 1);
-        if (map.containsKey(nextDay)
-                && !map.get(nextDay).isEmpty()
-                && map.get(nextDay).get(0).getType().equals(TypeEnum.CLOSE)) {
-            Type type = map.get(nextDay).get(0);
-            return convertUnixTimeToAmPm(type.getValue());
+    private String addNextDayValue(Map<DayOfWeek, List<UnixTime>> dayListEnumMap, DayOfWeek day) {
+        DayOfWeek nextDay = DayOfWeek.of(day.getValue() + 1);
+        if (dayListEnumMap.containsKey(nextDay)
+                && !dayListEnumMap.get(nextDay).isEmpty()
+                && dayListEnumMap.get(nextDay).get(0).getType().equals(Status.CLOSE)) {
+            UnixTime unixTimeType = dayListEnumMap.get(nextDay).get(0);
+            return convertTypeToAmPm(unixTimeType.getValue());
         } else {
             throw new IllegalArgumentException("Invalid value for day:" + nextDay);
         }

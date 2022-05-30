@@ -1,18 +1,19 @@
 package my.project.openinghours;
 
-import my.project.openinghours.controllers.inbound.Day;
-import my.project.openinghours.controllers.inbound.Type;
+
 import my.project.openinghours.services.OpeningHoursService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.DayOfWeek;
 import java.util.*;
 
-import static my.project.openinghours.controllers.inbound.TypeEnum.CLOSE;
-import static my.project.openinghours.controllers.inbound.TypeEnum.OPEN;
+import my.project.openinghours.model.UnixTime;
+
+import static my.project.openinghours.model.Status.CLOSE;
+import static my.project.openinghours.model.Status.OPEN;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -20,19 +21,19 @@ public class OpeningHoursServiceTests {
 
     @Autowired
     OpeningHoursService service;
-    EnumMap<Day, List<Type>> inboundEnumMap;
+    EnumMap<DayOfWeek, List<UnixTime>> inboundEnumMap;
     Map<String, String> outboundMap;
 
     @BeforeEach
     void createEnumMap() {
-        inboundEnumMap = new EnumMap<>(Day.class);
-        inboundEnumMap.put(Day.MONDAY, new ArrayList<>());
-        inboundEnumMap.put(Day.TUESDAY, List.of(new Type(OPEN, 36000), new Type(CLOSE, 64800)));
-        inboundEnumMap.put(Day.WEDNESDAY, new ArrayList<>());
-        inboundEnumMap.put(Day.THURSDAY, List.of(new Type(OPEN, 37800), new Type(CLOSE, 64800)));
-        inboundEnumMap.put(Day.FRIDAY, List.of(new Type(OPEN, 36000)));
-        inboundEnumMap.put(Day.SATURDAY, List.of(new Type(CLOSE, 3600), new Type(OPEN, 32400), new Type(CLOSE, 39600), new Type(OPEN, 57600), new Type(CLOSE, 82800)));
-        inboundEnumMap.put(Day.SUNDAY, List.of(new Type(OPEN, 43200), new Type(CLOSE, 75600)));
+        inboundEnumMap = new EnumMap<>(DayOfWeek.class);
+        inboundEnumMap.put(DayOfWeek.MONDAY, new ArrayList<>());
+        inboundEnumMap.put(DayOfWeek.TUESDAY, List.of(createType(OPEN, 36000), createType(CLOSE, 64800)));
+        inboundEnumMap.put(DayOfWeek.WEDNESDAY, new ArrayList<>());
+        inboundEnumMap.put(DayOfWeek.THURSDAY, List.of(createType(OPEN, 37800), createType(CLOSE, 64800)));
+        inboundEnumMap.put(DayOfWeek.FRIDAY, List.of(createType(OPEN, 36000)));
+        inboundEnumMap.put(DayOfWeek.SATURDAY, List.of(createType(CLOSE, 3600), createType(OPEN, 32400), createType(CLOSE, 39600), createType(OPEN, 57600), createType(CLOSE, 82800)));
+        inboundEnumMap.put(DayOfWeek.SUNDAY, List.of(createType(OPEN, 43200), createType(CLOSE, 75600)));
 
         outboundMap = new HashMap<>();
         outboundMap.put("Monday", "Closed");
@@ -53,8 +54,8 @@ public class OpeningHoursServiceTests {
     @Test
     void testConvertToReadableFormat_andGetInvalidArgument() {
 
-        EnumMap<Day, List<Type>> brokenMap = inboundEnumMap.clone();
-        brokenMap.remove(Day.SATURDAY);
+        EnumMap<DayOfWeek, List<UnixTime>> brokenMap = inboundEnumMap.clone();
+        brokenMap.remove(DayOfWeek.SATURDAY);
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             service.convertToReadableFormat(brokenMap);
         });
@@ -66,14 +67,21 @@ public class OpeningHoursServiceTests {
     }
 
     @Test
-    void testConvertUnixTimeToAmPm() {
-        int unixTime1 = 0;
-        int unixTime2 = 43200;
-        int unixTime3 = 64800;
+    void testConvertTypeToAmPm() {
+        int Type1 = 0;
+        int Type2 = 43200;
+        int Type3 = 64800;
 
-        assertEquals("12:00 AM", service.convertUnixTimeToAmPm(unixTime1));
-        assertEquals("12:00 PM", service.convertUnixTimeToAmPm(unixTime2));
-        assertEquals("06:00 PM", service.convertUnixTimeToAmPm(unixTime3));
+        assertEquals("12:00 AM", service.convertTypeToAmPm(Type1));
+        assertEquals("12:00 PM", service.convertTypeToAmPm(Type2));
+        assertEquals("06:00 PM", service.convertTypeToAmPm(Type3));
+    }
+
+    private UnixTime createType(my.project.openinghours.model.Status status, int value){
+        UnixTime unixTime = new UnixTime();
+        unixTime.setType(status);
+        unixTime.setValue(value);
+        return unixTime;
     }
 
 }

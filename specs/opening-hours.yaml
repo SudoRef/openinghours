@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: Opening-hours
+  version: 1.0.0
+  description: 'This is a service that accepts map of days and unix times and returns map with readable Am/Pm format'
+paths:
+  /opening-hours:
+    post:
+      summary: "Get opening hours with unix time and return them in readable am/pm format"
+      description: "get Opening Hours"
+      operationId: "postUnixTimeAndGetOpeningHours"
+      requestBody:
+        description: "Raw map with unix time format"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnixTimes"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AmPmMap'
+        "400":
+            description: "Invalid status value"
+
+components:
+  schemas:
+    AmPmMap:
+      type: string
+      additionalProperties:
+        type: string
+      example:
+        Monday: Closed
+        Tuesday: 10:00 AM - 06:00 PM
+    Status:
+      type: string
+      enum:
+        - open
+        - close
+    UnixTime:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/Status"
+        value:
+          type: integer
+    UnixTimes:
+      type: string
+      additionalProperties:
+        "$ref": "#/components/schemas/UnixTimeList"
+    UnixTimeList:
+      type: array
+      items:
+        $ref: '#/components/schemas/UnixTime'

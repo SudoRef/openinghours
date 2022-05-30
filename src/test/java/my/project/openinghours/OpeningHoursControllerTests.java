@@ -26,10 +26,10 @@ public class OpeningHoursControllerTests {
     int randomServerPort;
 
     @Test
-    void sendGetRequest_AndReceiveCorrectSchedule() throws Exception {
+    void sendPostRequest_AndReceiveCorrectSchedule() throws Exception {
 
         String goodRequest = TestUtils.OK_REQUEST;
-        MvcResult mvcResult = mockMvc.perform(get("/opening-hours")
+        MvcResult mvcResult = mockMvc.perform(post("/opening-hours")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(goodRequest))
                 .andExpect(status().isOk())
@@ -39,9 +39,9 @@ public class OpeningHoursControllerTests {
     }
 
     @Test
-    void sendGetRequest_withNullData_AndReceiveInvalidArgumentException() throws Exception {
+    void sendPostRequest_withNullData_AndReceiveInvalidArgumentException() throws Exception {
         String nullValueRequest = TestUtils.BROKEN_REQUEST_NULL_VALUE;
-        MvcResult mvcResult = mockMvc.perform(get("/opening-hours")
+        MvcResult mvcResult = mockMvc.perform(post("/opening-hours")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(nullValueRequest))
                 .andExpect(status().isBadRequest())
@@ -50,9 +50,9 @@ public class OpeningHoursControllerTests {
     }
 
     @Test
-    void sendGetRequest_withBrokenData_AndReceiveInvalidArgumentException1() throws Exception {
+    void sendPostRequest_withBrokenData_AndReceiveInvalidArgumentException1() throws Exception {
         String brokenRequest = TestUtils.BROKEN_REQUEST_NEGATIVE_VALUE;
-        MvcResult mvcResult = mockMvc.perform(get("/opening-hours")
+        MvcResult mvcResult = mockMvc.perform(post("/opening-hours")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(brokenRequest))
                 .andExpect(status().isBadRequest())
@@ -61,9 +61,9 @@ public class OpeningHoursControllerTests {
     }
 
     @Test
-    void sendGetRequest_withBrokenData_AndReceiveInvalidArgumentException2() throws Exception {
+    void sendPostRequest_withBrokenData_AndReceiveInvalidArgumentException2() throws Exception {
         String brokenRequest = TestUtils.BROKEN_REQUEST_TOO_BIG_VALUE;
-        MvcResult mvcResult = mockMvc.perform(get("/opening-hours")
+        MvcResult mvcResult = mockMvc.perform(post("/opening-hours")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(brokenRequest))
                 .andExpect(status().isBadRequest())
@@ -72,9 +72,9 @@ public class OpeningHoursControllerTests {
     }
 
     @Test
-    void sendGetRequest_withBrokenData_AndReceiveInvalidArgumentException3() throws Exception {
+    void sendPostRequest_withBrokenData_AndReceiveInvalidArgumentException3() throws Exception {
         String brokenRequest = TestUtils.BROKEN_REQUEST_MIXED_UP_VALUE;
-        MvcResult mvcResult = mockMvc.perform(get("/opening-hours")
+        MvcResult mvcResult = mockMvc.perform(post("/opening-hours")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(brokenRequest))
                 .andExpect(status().isBadRequest())
@@ -83,8 +83,8 @@ public class OpeningHoursControllerTests {
     }
 
     @Test
-    void sendGetRequest_Receive404() throws Exception {
-        mockMvc.perform(get("/asdf")
+    void sendPostRequest_Receive404() throws Exception {
+        mockMvc.perform(post("/asdf")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(TestUtils.OK_REQUEST))
                 .andExpect(status().isNotFound());
@@ -93,7 +93,7 @@ public class OpeningHoursControllerTests {
 
     @Test
     void sendGetRequest_Receive405() throws Exception {
-        mockMvc.perform(post("/opening-hours")
+        mockMvc.perform(get("/opening-hours")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(TestUtils.OK_REQUEST))
                 .andExpect(status().isMethodNotAllowed());

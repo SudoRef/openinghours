@@ -1,11 +1,11 @@
 package my.project.openinghours.utils;
 
-import my.project.openinghours.controllers.inbound.Day;
-import my.project.openinghours.controllers.inbound.Type;
+import my.project.openinghours.model.UnixTime;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import java.time.DayOfWeek;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -23,13 +23,13 @@ public class MapValidator implements Validator {
 
     @Override
     public void validate(Object target, Errors errors) {
-        final EnumMap<Day, List<Type>> enumMap = (EnumMap<Day, List<Type>>) target;
+        final EnumMap<DayOfWeek, List<UnixTime>> enumMap = (EnumMap<DayOfWeek, List<UnixTime>>) target;
         enumMap.values().forEach(types -> getErrors(errors, types));
     }
 
-    private void getErrors(Errors errors, List<Type> types) {
+    private void getErrors(Errors errors, List<UnixTime> types) {
         for (int i = 0; i < types.size(); i++) {
-            Type type = types.get(i);
+            UnixTime type = types.get(i);
             if (type.getValue() == null || type.getValue() < MIN_TIME_VALUE || type.getValue() > MAX_TIME_VALUE) {
                 errors.reject("0", "Invalid type format. Type cannot be null, negative or bigger than " + MAX_TIME_VALUE);
                 break;
