@@ -1,18 +1,13 @@
 package my.project.openinghours.controllers;
 
 
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Example;
-import io.swagger.annotations.ExampleProperty;
 import lombok.AllArgsConstructor;
 import my.project.openinghours.model.UnixTime;
 import my.project.openinghours.services.OpeningHoursService;
 import my.project.openinghours.utils.MapValidator;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MapBindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.DayOfWeek;

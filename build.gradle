@@ -1,3 +1,5 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
 plugins {
     id 'org.springframework.boot' version '2.7.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
@@ -31,9 +33,6 @@ dependencies {
     implementation 'org.webjars:swagger-ui:4.11.1'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
 test {
     useJUnitPlatform()
 }
@@ -46,15 +45,15 @@ openApiGenerate {
     invokerPackage = "my.project.openinghours.invoker"
     modelPackage = "my.project.openinghours.model"
     configOptions = [
-            interfaceOnly: "true",
-            skipDefaultInterface:"true"
+            interfaceOnly       : "true",
+            skipDefaultInterface: "true"
     ]
-    sourceSets {
-        main {
-            java {
-                srcDir "${buildDir.absolutePath}"
-            }
+}
+compileJava.dependsOn(tasks.openApiGenerate)
+sourceSets {
+    main {
+        java {
+            srcDir "${buildDir.absolutePath}"
         }
     }
-
 }
